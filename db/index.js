@@ -109,20 +109,30 @@ async function createTags(tagList) {
     return;
   }
 
-  const insertValues = tagList.map (
-    (_, index) => `$${index + 1}`).join('), (')
+  const valuesStringInsert = tagList.map(
+    (_, index) => `$${index + 1}`
+  ).join('), (');
 
-    const selectValues = tagList.map(
-      (_, index) => `$${index + 1}`).join(', ');
+  const valuesStringSelect = tagList.map(
+    (_, index) => `$${index + 1}`
+  ).join(', ');
 
   try {
-    const {rows: tags} = await client.query(`
+    // insert all, ignoring duplicates
+    await client.query(`
       INSERT INTO tags(name)
-      VALUES (${insertValues})
-      ON CONFLICT (name) DO NOTHING
-      RETURNING *
-    `, tagList)
-    return tags;
+      VALUES (${ valuesStringInsert })
+      ON CONFLICT (name) DO NOTHING;
+    `, tagList);
+
+    // grab all and return
+    const { rows } = await client.query(`
+      SELECT * FROM tags
+      WHERE name
+      IN (${ valuesStringSelect });
+    `, tagList);
+
+    return rows;
   } catch (error) {
     throw error;
   }
@@ -276,6 +286,19 @@ async function getPostsByTagName(tagName) {
     throw error;
   }
 } 
+
+async function getAllTags() {
+  try {
+    const { rows: tags } = await client.query(`
+      SELECT *
+      FROM tags;
+    `);
+
+    return tags;
+  } catch (error) {
+    throw error;
+  }
+}
   
 module.exports = {
   client,
@@ -291,6 +314,6 @@ module.exports = {
   updatePost,
   getAllPosts,
   getPostsByUser,
-  getPostsByTagName
-  
+  getPostsByTagName,
+  getAllTags,
 }

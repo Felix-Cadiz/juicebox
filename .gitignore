@@ -1,6 +1,5 @@
 node_modules
+.env
 
-//The project is not completely lining up with the provided examples. The issue is
-//located within the createTags function as well as the 
-//"post.tags = tags.map(tag => tag.name)?? on line 96 in index.js. 
-//When referencing the provided examples, refer to 3.3 and 3.4.
+Currently on Giving them a Token.
+No issues at the moment.
